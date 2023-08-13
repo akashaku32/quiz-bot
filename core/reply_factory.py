@@ -29,24 +29,40 @@ def generate_bot_responses(message, session):
 
 
 def record_current_answer(answer, current_question_id, session):
-    '''
-    Validates and stores the answer for the current question to django session.
-    '''
-    return True, ""
+    
+    if current_question_id is not None:
+        session[current_question_id] = answer
+        return True, ""
+    return False, "No question to answer."
 
 
 def get_next_question(current_question_id):
-    '''
-    Fetches the next question from the PYTHON_QUESTION_LIST based on the current_question_id.
-    '''
-
-    return "dummy question", -1
-
+  if current_question_id is None:
+        return PYTHON_QUESTION_LIST[0], 0
+    
+    current_question_index = current_question_id + 1
+    if current_question_index < len(PYTHON_QUESTION_LIST):
+        return PYTHON_QUESTION_LIST[current_question_index], current_question_index
+    else:
+        return None, None
 
 def generate_final_response(session):
-    '''
-    Creates a final result message including a score based on the answers
-    by the user for questions in the PYTHON_QUESTION_LIST.
-    '''
+   
 
-    return "dummy result"
+    score = 0
+    total_questions = len(PYTHON_QUESTION_LIST)
+
+    for question_id, correct_answer in enumerate(PYTHON_QUESTION_LIST):
+        user_answer = session.get(question_id)
+        if user_answer == correct_answer:
+            score += 1
+
+    score_percentage = (score / total_questions) * 100
+    final_result = f"Your score: {score}/{total_questions} ({score_percentage:.2f}%)."
+    return final_result
+
+
+
+
+
+
